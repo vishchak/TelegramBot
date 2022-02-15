@@ -17,6 +17,16 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public User findById(long id) {
+        return userRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
     public User findByChatId(long id) {
         return userRepository.findByChatId(id);
     }

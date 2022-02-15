@@ -2,6 +2,7 @@ package ua.kiev.prog.bot;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class ChatBot extends TelegramLongPollingBot {
 
     private static final String BROADCAST = "broadcast ";
     private static final String LIST_USERS = "users";
+    private static final String MSG = "msg ";
 
     @Value("${bot.name}")
     private String botName;
@@ -99,8 +101,15 @@ public class ChatBot extends TelegramLongPollingBot {
             LOGGER.info("Admin command received: " + BROADCAST);
 
             text = text.substring(BROADCAST.length());
-            broadcast(text);
 
+            broadcast(text);
+            return true;
+        } else if (text.startsWith(MSG)) {
+            LOGGER.info("Admin command received: " + MSG);
+
+            text = text.substring(MSG.length());
+
+            msg(text);
             return true;
         } else if (text.equals(LIST_USERS)) {
             LOGGER.info("Admin command received: " + LIST_USERS);
@@ -142,12 +151,12 @@ public class ChatBot extends TelegramLongPollingBot {
         List<User> users = userService.findAllUsers();
 
         users.forEach(user ->
-            sb.append(user.getId())
-                    .append(' ')
-                    .append(user.getPhone())
-                    .append(' ')
-                    .append(user.getEmail())
-                    .append("\r\n")
+                sb.append(user.getId())
+                        .append(' ')
+                        .append(user.getPhone())
+                        .append(' ')
+                        .append(user.getEmail())
+                        .append("\r\n")
         );
 
         sendPhoto(admin.getChatId());
@@ -158,4 +167,17 @@ public class ChatBot extends TelegramLongPollingBot {
         List<User> users = userService.findAllUsers();
         users.forEach(user -> sendMessage(user.getChatId(), text));
     }
+
+    private void msg(String mailOrIdAndText) {
+        String[] mailOrId = mailOrIdAndText.split(" ");
+        User user;
+        if (mailOrId[0].contains("@")) {
+            user = userService.findByEmail(mailOrId[0]);
+        } else {
+            user = userService.findById(Long.parseLong(mailOrId[0]));
+        }
+        sendMessage(user.getChatId(), mailOrId[1]);
+    }
 }
+
+

@@ -73,6 +73,8 @@ public enum BotState {
         }
     };
 
+    // --------------- //
+
     private static BotState[] states;
     private final boolean inputNeeded;
 
